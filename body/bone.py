@@ -2,19 +2,30 @@ from utils import *
 
 rigify = 'metarig'
 
-class Bone(object):
+class Config(object):
+    def __init__(self):
+        self.gravity = 100
+        self.fps = 120
+        self.current_frame = 0
+
+class Bone(Config):
     def __init__(self, name):
         self.rotation_mode = 'XYZ'
         self.bone = ''
         self.name = name
+        self.mass = 0
 
-        self.gravity = 10
-        self.support = 10
-        self.thrust = 10
-        self.Rotation = 0
+        self.vcx = 0
+        self.vcy = 0
+        self.vcz = 0
+
+        self.support = 0
         self.friction = 0
 
-        self.status = ()
+        self.rotation_x = 0
+        self.rotation_y = 0
+        self.rotation_z = 0
+
         self.init()
 
     def init(self):
