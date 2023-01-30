@@ -8,12 +8,19 @@ class Thigh(Bone):
         self.mass = 25
         self.shin =  Shin(side)
 
-    def estimate(self, coordinate, torque, duration):
+    def estimate(self, *args):
+        self.rotation_x, self.vcx, frame_id = self.formula('x', args[0], args[3])
+        self.rotation_euler_X(self.rotation_x)
+        self.keyframe_x += frame_id
+
+        self.keyframe_insert(frame_id)
+
+    def formula(self, coordinate, torque, duration):
         # force_rate = fragment.torque_x / (fragment.torque_x + fragment.torque_y)
 
-        cur_rotation = getattr(self, "rotation_"+coordinate)
         vc = getattr(self, "vc"+coordinate)
         if duration == -1: # until touch the ground
+            cur_rotation = getattr(self, "rotation_"+coordinate)
             a = (torque - self.gravity * self.mass) / self.mass
             if a != 0:
                 duration = pow((cur_rotation * 2 * a + vc * vc) / (a * a), 0.5)
@@ -21,14 +28,15 @@ class Thigh(Bone):
             else:
                 duration = cur_rotation / vc
                 vt = 0
+            rotation = -1 * cur_rotation
         elif duration == -2: # on the ground
             a = torque / self.mass
             if a != 0:
-                duration = pow((cur_rotation * 2 * a + vc * vc) / (a * a), 0.5)
-                vt = 0
+                vt = vc + a * duration
+                rotation = (vt * vt - vc * vc) / (2 * a)
             else:
-                duration = cur_rotation / vc
-                vt = 0
+                vt = vc
+                rotation = vt * duration
         else:
             a = (torque - self.gravity * self.mass) / self.mass
             if a != 0:
@@ -37,7 +45,6 @@ class Thigh(Bone):
             else:
                 vt = vc
                 rotation = vt * duration
-            return vt, rotation
 
         # a = (fragment.torque_y - (1 - force_rate) * self.gravity * self.mass) / self.mass
         # if a != 0:
@@ -51,13 +58,9 @@ class Thigh(Bone):
         #     self.rotation_z = (vt * vt - self.vcz * self.vcz) / (2 * a)
         #     self.vcz = vt
 
-        frame_id = self.current_frame + fragment.duration * self.fps
-        self.current_frame = frame_id
+        frame_id = self.current_frame + duration * self.fps
 
-        self.rotation_euler_X(x)
-        self.rotation_euler_Y(y)
-        self.rotation_euler_Z(z)
-        self.keyframe_insert(frame_id)
+        return rotation, vt, frame_id
 
     def func_switch(self, func, x, y, z, frame_id, *args):
         if func == 'motion':
@@ -83,7 +86,7 @@ class Shin(Bone):
     def __init__(self, side):
         super().__init__(self.__class__.__name__.lower() + '.' + side)
         self.mass = 15
-        self.foot = Foot()
+        self.foot = Foot(side)
 
     def func_switch(self, func, x, y, z, frame_id, *args):
         if func == 'motion':
@@ -109,14 +112,14 @@ class Foot(Bone):
     def __init__(self, side):
         super().__init__(self.__class__.__name__.lower() + '.' + side)
         self.mass = 5
-        self.toe = Toe()
-        self.heel = Heel()
+        self.toe = Toe(side)
+        self.heel = Heel(side)
 
 class Toe(Bone):
     def __init__(self, side):
         super().__init__(self.__class__.__name__.lower() + '.' + side)
         self.mass = 3
-        self.friction = Friction()
+        # self.friction = Friction()
 
     def func_switch(self, func):
         if func == 'friction':

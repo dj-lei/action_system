@@ -19,12 +19,13 @@ class Bone(Config):
         self.vcy = 0
         self.vcz = 0
 
-        self.support = 0
-        self.friction = 0
-
         self.rotation_x = 0
         self.rotation_y = 0
         self.rotation_z = 0
+
+        self.keyframe_x = 0
+        self.keyframe_y = 0
+        self.keyframe_z = 0
 
         self.init()
 

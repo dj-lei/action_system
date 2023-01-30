@@ -1,0 +1,31 @@
+import bpy
+import math
+import numpy as np
+
+rigify = 'metarig'
+
+#bpy.data.objects[rigify].animation_data_clear()
+
+#bone = bpy.data.objects[rigify].pose.bones['thigh.R']
+
+#bone.rotation_euler.rotate_axis("X", 0)
+#bone.keyframe_insert(data_path="rotation_euler" ,frame = 0)
+
+#bone.rotation_euler.rotate_axis("X", math.radians(30))
+#bone.keyframe_insert(data_path="rotation_euler" ,frame = 20)
+
+R = bpy.data.objects[rigify].matrix_world.to_3x3()
+R = np.array(R)
+
+t = bpy.data.objects[rigify].matrix_world.translation
+t = np.array(t) 
+
+print(f"R = {R.shape}\n{R}")
+print(f"t = {t.shape}\n{t}")
+
+local_location = bpy.data.objects[rigify].data.bones['thigh.R'].head_local
+local_location = np.array(local_location)
+print(f"local position = {local_location.shape}\n{local_location}")
+
+loc = np.dot(R, local_location) + t 
+print(f"final loc = {loc.shape}\n{loc}")
